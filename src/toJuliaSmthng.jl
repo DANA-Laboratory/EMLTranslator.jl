@@ -291,7 +291,7 @@ end
 #************************************************************
 function toJuliaATTRIBUTES(attribs::String,modelName::String)
   attribs="fields[:"*replace(replace(replace(replace(attribs," ",""),"=","]="),r";$",""),";",";fields[:")
-  return "function atributes(in::$modelName,_::Dict{Symbol,Any})\tfields::Dict{Symbol,Any}=(Symbol=>Any)[];"*attribs*";drive!(fields,_);return fields\nend;"
+  return "function atributes(in::$modelName,_::Dict{Symbol,Any})\tfields::Dict{Symbol,Any}=Dict{Symbol,Any}();"*attribs*";drive!(fields,_);return fields\nend;"
 end
 #************************************************************
 function toJuliaTypeDef( typeDef::String, compiledTypeDef::IOBuffer) 
@@ -304,7 +304,7 @@ function toJuliaTypeDef( typeDef::String, compiledTypeDef::IOBuffer)
     baseType::String= isBuiltIn ? "Dana" * strip(m.captures[2]) * "Parametric" : "Dana" * strip(m.captures[2])
     write(compiledTypeDef,"export " * typeName * ";typealias Dana" * m.captures[1] * " " * baseType * ";")
     write(compiledTypeDef,"type _",m.captures[1],"\t")
-    write(compiledTypeDef,"function _",m.captures[1],"(_::Dict{Symbol,Any})\tfields::Dict{Symbol,Any}=(Symbol=>Any)[];")
+    write(compiledTypeDef,"function _",m.captures[1],"(_::Dict{Symbol,Any})\tfields::Dict{Symbol,Any}=Dict{Symbol,Any}();")
     write(compiledTypeDef,"fields[:")
     inits::String = replace(replace(replace(replace(m.captures[3], "=", "]=")," final ", " final"),",",";fields[:")," ","")
     write(compiledTypeDef,inits,";drive!(fields,_);new(" * baseConstractor * ")" * "\nend;value::Dict{Symbol,Any}\nend")
@@ -345,13 +345,13 @@ function toJuliaParVar( typeDef::String, body::IOBuffer, constructor::IOBuffer, 
     end
     write(constructor,baseConstractor)
     if m.captures[6]!=nothing
-      write(constructor,"((Symbol=>Any)[\t")
+      write(constructor,"(Dict{Symbol,Any}(\t")
       write(constructor,":")
       inits::String = replace(replace(replace(m.captures[7],r" *= *","=>"),r", ?(?=[\w]*=)", ",;:")," final ", " final")
       if m.captures[4]!=nothing
-        write(constructor,inits, "\n]),",m.captures[4],"),;")
+        write(constructor,inits, "\n)),",m.captures[4],"),;")
       else
-        write(constructor,inits, "\n]),;")
+        write(constructor,inits, "\n)),;")
       end
     else
        m.captures[4]==nothing ? write(constructor, "(),;") : write(constructor, "()),;")
