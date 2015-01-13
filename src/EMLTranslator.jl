@@ -49,7 +49,7 @@ module EMLTranslator
     #create a module for all models included in this file
     write(bMainModule,"module ","EML",basename(outPutDirectory),"\t")
     #all modules must load BuiltIn and using it
-		write(bMainModule,"using DanaTypes;using NamesOfTypes;")
+		write(bMainModule,"using DanaTypes;using TypeInheritance;")
 		for i in 1:length(sModelFileSplit)
       if beginswith(sModelFileSplit[i],"Model ")
 				compiledModel::IOBuffer=PipeBuffer()

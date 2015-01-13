@@ -20,11 +20,10 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
       pars=split(m.captures[3],',')
       for i = 1:length(pars)
         write(constructor,pars[i]*"(),;")
-        write(body,"_P"*string(i)*"::",pars[i] ,";")
-        push!(modelnames,"_P"*string(i))
+        write(body,"_base_"*string(i)*"::",pars[i] ,";")
+        push!(modelnames,"_base_"*string(i))
         push!(modeltypes,pars[i])
       end
-      typeaddstr="addnamestoinventory("*modelName*");"
     end
     model =  m.captures[4]
     model=replace(model,"ATTRIBUTES", "\nATTRIBUTES")

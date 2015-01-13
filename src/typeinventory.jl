@@ -52,7 +52,7 @@ module typeinventory
 
     j=1
     for i in [1:length(na)]
-      if beginswith(na[i],"_P")
+      if beginswith(na[i],"_base_")
         ap=collect(keys(inventory[ty[i]]))
         axp=collect(values(inventory[ty[i]]))
         typ=collect(values(inventory[ty[i]]))
