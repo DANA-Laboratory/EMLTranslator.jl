@@ -21,7 +21,7 @@ function createJuliaSetProperty( name::String, ProType::String)
   return "function " * name * "(newVal::" * ProType *")\t" * name * "=newVal;\nend;"
 end
 #************************************************************
-function addparentbinding(modelName::String,block::String)   
+function addparentbinding(modelName::String,block::String)
   pVar::Regex = r"\b[a-zA-Z_][\w\.]*[\w]\b"
   offset::Int=1
   bRet::IOBuffer=PipeBuffer()
@@ -36,4 +36,3 @@ end
 function libRelatedPath(absPath::String)
   return replace(absPath,Main.jEmlPath,"")
 end
-
