@@ -26,7 +26,7 @@ function addparentbinding(modelName::String,block::String)
   offset::Int=1
   bRet::IOBuffer=PipeBuffer()
   while (m=match(pVar,block,offset))!=nothing
-    write(bRet,block[offset:m.offset-1],getdotexpr(modelName,m.match))
+    write(bRet,block[offset:m.offset-1],getdotexpr(modelName,String(m.match)))
     offset=m.offset+sizeof(m.match)
   end
   write(bRet,block[offset:sizeof(block)])

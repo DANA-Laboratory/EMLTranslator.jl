@@ -22,7 +22,7 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
   jDStrings::Vector{String} = Array(String,0)
   push!(jDStrings,"") #defualt empty string
   jSStrings::Vector{String} = Array(String,0)
-  sModelFile::String=readall(open(_filePath))
+  sModelFile::String=readstring(open(_filePath))
   #*****************************************************
   outPutDirectory::String = replace(replace(_filePath,r"\.[^.]*$", ""),Main.emlPath, Main.jEmlPath)
   if !(isdir(outPutDirectory))
@@ -54,7 +54,7 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
     if startswith(sModelFileSplit[i],"Model ")
       compiledModel::IOBuffer=PipeBuffer()
       seekstart(bComments)
-      write(compiledModel,readall(bComments))
+      write(compiledModel,readstring(bComments))
       ret = toJuliaModel(sModelFileSplit[i],compiledModel)
       modelName::String=""
       if ret[1]!=nothing
@@ -74,24 +74,24 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
         while (m=match(pTypedef,sModelFileSplit[i],offset))!=nothing
           compiledType::IOBuffer=PipeBuffer()
           seekstart(bComments)
-          write(compiledType,readall(bComments))
+          write(compiledType,readstring(bComments))
           write(bComments,sModelFileSplit[i][offset:m.offset-1])
           offset=m.offset+sizeof(m.match)
-          typeName::String = toJuliaTypeDef(m.match,compiledType)
+          typeName::String = toJuliaTypeDef(String(m.match),compiledType)
           write(bMainModule,"include(\"" * basename(outPutDirectory) * "/" * typeName *".jl\");")
           writeStringToFile(takePartsTogether(formatJulia(takebuf_string(compiledType)),jComments,jBComments,jDStrings,jSStrings),outPutDirectory*"/"*typeName*".jl")
         end
         write(bComments,sModelFileSplit[i][offset:sizeof(sModelFileSplit[i])])
         seekstart(bComments)
-        sModelFileSplit[i]=readall(bComments)
+        sModelFileSplit[i]=readstring(bComments)
         offset=1
         truncate(bComments,0)
         while (m=match(pUsing,sModelFileSplit[i],offset))!=nothing
           if m.captures[1]=="\""
-            sUsing=jDStrings[integer(m.captures[2])]
+            sUsing=jDStrings[parse(m.captures[2])]
           else
             if m.captures[1]=="'"
-              sUsing=jSStrings[integer(m.captures[2])]
+              sUsing=jSStrings[parse(m.captures[2])]
             end
           end
           write(bComments,sModelFileSplit[i][offset:m.offset-1])
@@ -116,7 +116,7 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
         end
         write(bComments,sModelFileSplit[i][offset:sizeof(sModelFileSplit[i])])
         seekstart(bComments)
-        sModelFileSplit[i]=readall(bComments)
+        sModelFileSplit[i]=readstring(bComments)
       end
     end
   end
@@ -137,7 +137,11 @@ function takeFileApart(sModelFile::String,jComments::Vector{String},jBComments::
   bModelFile::IOBuffer=PipeBuffer()
   c::Char=' '
   while i<=oLength
-    c = sModelFile[i]
+    try
+      c = sModelFile[i]
+    catch err
+      c,i = next(sModelFile, i-1)
+    end
     if (blockCommentStart &&  (c != '*' || sModelFile[i+1]!='#')) || (commentStart && c != '\n') || (dStringStart && c != '"') || (sStringStart && c != '\'') #something started and continue
       if sStringStart && c=='$'
         write(commentArrayOrString,'\\')
@@ -233,7 +237,7 @@ function takePartsTogether(sModelFile::String,jComments::Vector{String},jBCommen
         sI*=string(sModelFile[i])
         nc=sModelFile[i+1]
       end
-      index::Int=integer(sI)
+      index::Int=parse(sI)
       if c=='"'
         write(bModelFile,'"')
         write(bModelFile,jDStrings[index])

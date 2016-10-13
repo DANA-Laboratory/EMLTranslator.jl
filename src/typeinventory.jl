@@ -21,7 +21,7 @@ function getdotexpr(typename::String,ex::String)
     if !haskey(inventory[typename],args[1])
       return ex
     end
-    ret=(inventory[typename][args[1]])*"."*getdotexpr(inventorytyp[typename][args[1]],args[2])
+    ret=(inventory[typename][args[1]])*"."*getdotexpr(inventorytyp[typename][args[1]],String(args[2]))
   end
   return ret
 end
@@ -51,14 +51,14 @@ function addparentnames(typename::String,na::Array{String,1},ty::Array{String,1}
   rettyp::Array{String,1}=Array(String,0)
 
   j=1
-  for i in [1:length(na)]
+  for i in 1:length(na)
     if startswith(na[i],"_base_")
       ap=collect(keys(inventory[ty[i]]))
       axp=collect(values(inventory[ty[i]]))
       typ=collect(values(inventory[ty[i]]))
       parentNames=vcat(parentNames,ap)
       parentTyp=vcat(parentTyp,typ)
-      for j in [1:length(axp)]
+      for j in 1:length(axp)
         axp[j]=na[i]*"."*axp[j]
       end
       parentExprs=vcat(parentExprs,axp)

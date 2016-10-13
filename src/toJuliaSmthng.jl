@@ -11,7 +11,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
     body::IOBuffer=PipeBuffer()
     constructor::IOBuffer=PipeBuffer()
     bModule::IOBuffer=PipeBuffer()
-    modelName=m.captures[1]
+    modelName=String(m.captures[1])
     write(compiledModel,"type "*modelName*"\t"*modelName*"()=begin\t")
       write(constructor,"new(\t")
       #check if model as a child
@@ -41,7 +41,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
           thisAttribs*=m.captures[2]
         else
           if m.captures[1]=="PARAMETERS"
-            arrnames,arrtypes=toJuliaParVar(m.captures[2],body,constructor,compiledModel)
+            arrnames,arrtypes=toJuliaParVar(String(m.captures[2]),body,constructor,compiledModel)
             for nameitm in arrnames
               thisParams*=":"*nameitm*","
             end
@@ -49,7 +49,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
             modeltypes=vcat(modeltypes,arrtypes)
           else
             if m.captures[1]=="VARIABLES"
-              arrnames,arrtypes=toJuliaParVar(m.captures[2],body,constructor,nothing)
+              arrnames,arrtypes=toJuliaParVar(String(m.captures[2]),body,constructor,nothing)
               for nameitm in arrnames
                 thisVars*=":"*nameitm*","
               end
@@ -59,7 +59,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
               #add to repository
               addtypetoinventory(modelName,modelnames,modeltypes)
               if m.captures[1]=="EQUATIONS"
-                ret=toJuliaEQUATIONS(m.captures[2],body,constructor,modelName)
+                ret=toJuliaEQUATIONS(String(m.captures[2]),body,constructor,modelName)
                 if ret[1]==nothing
                   return ret
                 else
@@ -67,7 +67,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
                 end
               else
                 if m.captures[1]=="INITIAL"
-                  ret=toJuliaEQUATIONS(m.captures[2],body,compiledModel,modelName,"initials::Array{Expr,1};","initialNames::Array{String,1};","function initial(")
+                  ret=toJuliaEQUATIONS(String(m.captures[2]),body,compiledModel,modelName,"initials::Array{Expr,1};","initialNames::Array{String,1};","function initial(")
                   if ret[1]==nothing
                     return ret
                   else
@@ -75,7 +75,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
                   end
                 else
                   if m.captures[1]=="SET"
-                    write(bModule,toJuliaSET(m.captures[2],modelName))
+                    write(bModule,toJuliaSET(String(m.captures[2]),modelName))
                   end
                 end
               end
@@ -140,7 +140,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
     function toJuliaEQUATIONS(equationFlow::String, body::IOBuffer, constructor::IOBuffer, modelName::String, eqType::String="equations::Array{Expr,1};", eqNameType="equationNames::Array{String,1};", funcDec="function setEquationFlow(")
       bEq::IOBuffer=PipeBuffer()
       bEquationNames::IOBuffer=PipeBuffer()
-      pKeyWord=r" *((end)|((if.+?)then)|(switch ([\w]+))|(case ([^:]+):)|(when (.+?) switchto ([^;]+);)|(for ([\w]+) in (\[[^\]]+\]))|(\"[0-9]+)|(\#\*?[0-9]+)|(\'[0-9]+)|(else)|(([^=]+=[^;]+);))"
+      pKeyWord=r" *((end)|((if.+?)then)|(switch ([\w]+))|(case ([^:]+):)|(when (.+?) switchto ([^;]+);)|(for ([\w]+) in (\[[^\]]+\]) do)|(\"[0-9]+)|(\#\*?[0-9]+)|(\'[0-9]+)|(else)|(([^=]+=[^;]+);))"
       offset::Int=1
       aKeyWords::Array{Int,1}=Array(Int,0)
       aWhen::Array{Int,1}=Array(Int,0)
@@ -153,15 +153,11 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
       b::Int=0
       k::Int=0
       iWhen::Int=0
-
       equationString::String="\"1"
-
       write(body,eqType)
       write(body,eqNameType)
-
       write(constructor,"[\t")
       write(bEquationNames,"[\t")
-
       write(bEq,funcDec,"in::",modelName,")\t")
       while (m=match(pKeyWord,equationFlow,offset))!=nothing
         if m.offset!=offset
@@ -244,7 +240,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
             #Equation
             b=1
             k=1
-            equation=m.captures[20]
+            equation=String(m.captures[20])
             while k<=length(aKeyWords)
               if aKeyWords[k]==12 #open for loop
                 r=Regex("\\b"*aBlockParam[b]*"\\b")
@@ -270,7 +266,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
       write(constructor,takebuf_string(bEquationNames))
       write(bEq,"\nend;")
       ret::String=takebuf_string(bEq)
-      for i in [1:iWhen]
+      for i in 1:iWhen
         if haskey(dWhen,i)
           ret=replace(ret,"\$WHEN"*string(i)*";",dWhen[i])
         else
@@ -293,7 +289,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
       return "function atributes(in::$modelName,_::Dict{Symbol,Any})\tfields::Dict{Symbol,Any}=Dict{Symbol,Any}();"*attribs*";drive!(fields,_);return fields\nend;"
     end
     #************************************************************
-    function toJuliaTypeDef( typeDef::String, compiledTypeDef::IOBuffer)
+    function toJuliaTypeDef(typeDef::String, compiledTypeDef::IOBuffer)
       pTypedef = r"\b([a-zA-Z_][\w]*)\b as ([^;\(]*)\(([^;\)]*)\);"
       typeName::String=""
       if (m=match(pTypedef,typeDef))!=nothing
