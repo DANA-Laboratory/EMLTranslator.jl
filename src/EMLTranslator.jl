@@ -51,7 +51,7 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
   #all modules must load BuiltIn and using it
   write(bMainModule,"using DanaTypes;using DotPlusInheritance;")
   for i in 1:length(sModelFileSplit)
-    if beginswith(sModelFileSplit[i],"Model ")
+    if startswith(sModelFileSplit[i],"Model ")
       compiledModel::IOBuffer=PipeBuffer()
       seekstart(bComments)
       write(compiledModel,readall(bComments))
@@ -66,7 +66,7 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
       end
       writeStringToFile(takePartsTogether(formatJulia(takebuf_string(compiledModel)),jComments,jBComments,jDStrings,jSStrings),outPutDirectory*"/"*modelName*".jl")
     else
-      if beginswith(sModelFileSplit[i],"FlowSheet ")
+      if startswith(sModelFileSplit[i],"FlowSheet ")
         #TODO
       else
         offset::Int=1
@@ -121,7 +121,7 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
     end
   end
   #close module
-  write (bMainModule,"\nend;")
+  write(bMainModule,"\nend;")
   writeStringToFile(formatJulia(takebuf_string(bMainModule)),outPutDirectory*".jl")
   return dictSetUsings[_filePath]
 end

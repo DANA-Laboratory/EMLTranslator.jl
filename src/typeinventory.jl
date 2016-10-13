@@ -52,7 +52,7 @@ function addparentnames(typename::String,na::Array{String,1},ty::Array{String,1}
 
   j=1
   for i in [1:length(na)]
-    if beginswith(na[i],"_base_")
+    if startswith(na[i],"_base_")
       ap=collect(keys(inventory[ty[i]]))
       axp=collect(values(inventory[ty[i]]))
       typ=collect(values(inventory[ty[i]]))

@@ -272,9 +272,9 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
       ret::String=takebuf_string(bEq)
       for i in [1:iWhen]
         if haskey(dWhen,i)
-          ret=replace (ret,"\$WHEN"*string(i)*";",dWhen[i])
+          ret=replace(ret,"\$WHEN"*string(i)*";",dWhen[i])
         else
-          ret=replace (ret,"\$WHEN"*string(i)*";","")
+          ret=replace(ret,"\$WHEN"*string(i)*";","")
         end
       end
       return ret
