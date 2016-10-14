@@ -295,7 +295,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
       if (m=match(pTypedef,typeDef))!=nothing
         typeName=m.captures[1]
         isBuiltIn::Bool=strip(m.captures[2]) in BuiltInTypes
-        baseConstractor::String= isBuiltIn ? "fields" : "_" * m.captures[2] * "(fields).value"
+        baseConstractor::String= isBuiltIn ? "fields" : "_" * strip(m.captures[2]) * "(fields).value"
         baseType::String= isBuiltIn ? "Dana" * strip(m.captures[2]) * "Parametric" : "Dana" * strip(m.captures[2])
         write(compiledTypeDef,"export " * typeName * ";typealias Dana" * m.captures[1] * " " * baseType * ";")
         write(compiledTypeDef,"type _",m.captures[1],"\t")
