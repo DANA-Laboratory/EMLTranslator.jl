@@ -97,10 +97,10 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
           write(bComments,sModelFileSplit[i][offset:m.offset-1])
           if isfile(Main.emlPath*"/"*sUsing*".mso")
             setUsing=translate(Main.emlPath*"/"*sUsing*".mso",allradyCompiled,dictSetUsings)
-            write(bMainModule,"require(\"$requirepath/" * sUsing *".jl\");")
+            write(bMainModule,"importall ..." * sUsing * ";")
           elseif isfile(dirname(_filePath)*"/"*sUsing*".mso")
             setUsing=translate(dirname(_filePath)*"/"*sUsing*".mso",allradyCompiled,dictSetUsings)
-            write(bMainModule,"require(\"$requirepath" * dirname(libRelatedPath(outPutDirectory)) * "/" * sUsing *".jl\");")
+            write(bMainModule,"importall .." * basename(dirname(outPutDirectory)) * "." * sUsing *";")
           else
             return nothing,"in translate: invalid using " * sUsing
           end
