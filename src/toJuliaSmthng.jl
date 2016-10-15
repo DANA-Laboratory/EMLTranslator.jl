@@ -328,8 +328,8 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
         push!(arrtypes,m.captures[3])
 
         isBuiltIn::Bool=strip(m.captures[5]) in BuiltInTypes
-        baseConstractor::String= isBuiltIn ? "Dana" * m.captures[5] : m.captures[5]
-        baseType::String= isBuiltIn ? "Dana" * m.captures[5] : m.captures[5]
+        baseConstractor::String= strip(isBuiltIn ? "Dana" * m.captures[5] : m.captures[5])
+        baseType::String= strip(isBuiltIn ? "Dana" * m.captures[5] : m.captures[5])
         if m.captures[4]!=nothing
           write(body,m.captures[3],"::Array{",baseType,"};")
         else
@@ -339,7 +339,7 @@ function toJuliaModel(model::String,compiledModel::IOBuffer)
           write(constructor,"fill(")
         end
         write(constructor,baseConstractor)
-        if m.captures[6]!=nothing
+        if m.captures[6]!=nothing #is it working?
           write(constructor,"(Dict{Symbol,Any}(\t")
           write(constructor,":")
           inits::String = replace(replace(replace(m.captures[7],r" *= *","=>"),r", ?(?=[\w]*=)", ",;:")," final ", " final")
