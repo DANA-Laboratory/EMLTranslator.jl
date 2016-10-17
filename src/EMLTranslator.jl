@@ -95,23 +95,23 @@ function translate(_filePath::String,allradyCompiled::Set{String},dictSetUsings:
             end
           end
           write(bComments,sModelFileSplit[i][offset:m.offset-1])
-          if isfile(Main.emlPath*"/"*sUsing*".mso")
-            setUsing=translate(Main.emlPath*"/"*sUsing*".mso", allradyCompiled, dictSetUsings)
+          if isfile(Main.emlPath * "/" * sUsing * ".mso")
+            setUsing=translate(Main.emlPath * "/" * sUsing * ".mso", allradyCompiled, dictSetUsings)
             if dirname(sUsing)==""
               write(bMainModule,"@reexport using ..." * sUsing * ".EML" * sUsing * ";")
             else
               write(bMainModule,"@reexport using ..." * dirname(sUsing) * ".EML" * basename(sUsing) * ";")
             end
-          elseif isfile(dirname(_filePath)*"/"*sUsing*".mso")
-            setUsing=translate(dirname(_filePath)*"/"*sUsing*".mso", allradyCompiled, dictSetUsings)
-            write(bMainModule,"@reexport using ..." * basename(dirname(outPutDirectory)) * ".EML" * sUsing *";")
+          elseif isfile(dirname(_filePath) * "/" * sUsing * ".mso")
+            setUsing=translate(dirname(_filePath) * "/" * sUsing * ".mso", allradyCompiled, dictSetUsings)
+            write(bMainModule,"@reexport using ..." * basename(dirname(outPutDirectory)) * ".EML" * sUsing * ";")
           else
             return nothing,"in translate: invalid using " * sUsing
           end
+          write(bMainModule,"import EMLtypes.length;")
           push!(dictSetUsings[_filePath],basename(sUsing))
           for item in setUsing
             if !in(item,dictSetUsings[_filePath])
-              write(bMainModule,"importall .EML",item,";")
               push!(dictSetUsings[_filePath],item)
             end
           end
